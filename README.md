@@ -503,25 +503,71 @@ Como já foi dito anteriomente, Go é uma linguagem de propósito geral, projeta
 
 > Falar: "Comparando com C, ambas são linguagens de propósito geral. Entretanto, Go foi projetada pensando nas necessidades atuais, como computação em nuvem, microsserviços e sistemas distribuídos. Já C continua sendo mais utilizada em sistemas embarcados, sistemas operacionais e aplicações de baixo nível. Por isso, apesar de ambas serem gerais, cada uma se destaca em domínios diferentes."
 
-### Slides - O que é o nosso projeto ?
+### Slide - O que é o nosso projeto ?
+Sistema de Busca e Indexação Distribuído
+- Backend desenvolvido em Go
+- Coleta, processamento e indexação de documentos
+- Suporte a sites e arquivos PDF
 
-Nosso projeto será um sistema backend, desenvolvido em Go, focado na criação de um **Serviço de Busca/Indexação de Conteúdo Distribuído**. 
+> Falar: "Nosso projeto consiste em um sistema backend desenvolvido em Go para realizar a busca e indexação de conteúdos distribuídos. O sistema é capaz de coletar documentos de diferentes fontes, como páginas da web e arquivos PDF, processar essas informações e criar um índice que permite realizar buscas de forma rápida e eficiente."
 
-Este serviço será capaz de coletar, processar e indexar o conteúdo de vários documentos que estão distribuídos em diferentes fontes (como links de sites variados ou arquivos PDF localizados em diferentes diretórios), permitindo buscas rápidas e eficientes sobre esse vasto volume de informações.
+- Coleta e Processamento Concorrente
+    - Uso de goroutines para processar múltiplas fontes simultaneamente
+    - Maior desempenho na coleta de documentos
+    - Redução do tempo de processamento
 
-**Alinhamento com as Premissas de Go:** A escolha da linguagem Go para este projeto é intrinsecamente alinhada com suas premissas de concorrência e paralelismo, sendo ideal para construir um sistema de busca/indexação distribuído. 
+> Falar: "Como os documentos podem vir de várias fontes independentes, utilizamos as goroutines para realizar a coleta de forma concorrente. Enquanto uma goroutine está lendo um site, outra pode estar processando um PDF, permitindo que várias tarefas aconteçam ao mesmo tempo e reduzindo significativamente o tempo de execução."
 
-- O problema central de coletar e processar documentos de múltiplas fontes independentes exige uma abordagem concorrente, onde o Go se destaca com suas goroutines leves para gerenciar a leitura de links de sites ou arquivos PDF de forma simultânea. 
+- Processamento Paralelo
+    - Parsing e indexação executados em paralelo
+    - Melhor aproveitamento dos múltiplos núcleos do processador
+    - Maior velocidade na construção do índice
 
-- Além disso, o parsing do conteúdo de cada documento, a tokenização e a construção do índice são tarefas intensivas em CPU. 
+> Falar: "Depois que os documentos são coletados, eles precisam ser analisados e indexados. Essas tarefas exigem bastante processamento e, por isso, também são executadas em paralelo. Dessa forma, conseguimos aproveitar melhor os processadores multicore e acelerar a criação do índice de busca."
 
-- O Go permite que essas etapas sejam realizadas em paralelo para diferentes documentos, aproveitando os múltiplos núcleos do processador para acelerar significativamente o processo de indexação. 
+- Sincronização
+    - Comunicação entre goroutines utilizando channels
+    - Proteção do índice compartilhado com sync.RWMutex
 
-- A natureza distribuída do problema será abordada pela capacidade do Go de coordenar o trabalho entre diferentes "nós" (instâncias do serviço) ou fontes de dados, utilizando channels para comunicação e mecanismos de sincronização como `sync.Map` ou `sync.Mutex` para proteger o índice compartilhado durante as atualizações concorrentes, demonstrando o modelo CSP e a gestão de recursos em um ambiente distribuído.
+> Falar: "Como várias goroutines trabalham ao mesmo tempo, é necessário sincronizar o acesso aos dados compartilhados. Para isso, utilizamos os channels, responsáveis pela comunicação entre as tarefas, e o sync.RWMutex, que protege o índice durante as atualizações".
 
-### Slide
+### Slide - Por que Go ?
 
-Adcionar aqui mais explicações sobre o projeto e o do código.
+| Requisito do projeto                  | Solução oferecida pelo Go |
+|  :---------------------------------:  |  :---------------------:  |
+| Coletar várias fontes simultaneamente | Goroutines                |
+| Comunicação entre tarefas             | Channels                  |
+| Processamento paralelo                | Escalonamento automático  |
+| Proteção de dados compartilhados      | `sync.RWMutex`            |
+
+> Falar: "Escolhemos Go porque ela atende exatamente às necessidades do projeto. A linguagem oferece suporte nativo à concorrência, facilita o processamento paralelo e fornece mecanismos seguros para sincronização entre tarefas. Isso permite desenvolver um sistema distribuído eficiente, escalável e com alto desempenho, exatamente o que é necessário para um serviço de busca e indexação."
+
+### Slide - Como Ele funciona ?
+
+O nosso projeto opera em duas fases principais: **Indexação** e **Busca**.
+
+### Indexação
+A indexação é o processo de coletar, analisar e armazenar informações de forma estruturada para permitir a recuperação rápida e eficiente de dados. Em nosso projeto, a indexação transforma o conteúdo bruto dos documentos em um formato otimizado para buscas.
+
+**O que é a Indexação?**
+- Em termos simples, a indexação cria um "mapa" ou "índice" de todas as palavras encontradas nos documentos, associando cada palavra aos documentos onde ela aparece. 
+- Isso é análogo ao índice remissivo de um livro, que lista termos importantes e as páginas onde eles podem ser encontrados. 
+- Sem um índice, uma busca exigiria a leitura completa de cada documento, o que seria inviável para grandes volumes de dados.
+
+**Como foi aplicada em nosso Projeto ?**
+- Em nosso projeto, a indexação é gerenciada pela `struct Indexer` (localizada em `pkg/index/index.go`). Esta estrutura encapsula todo o estado do índice, incluindo:
+    - `Index`: Um mapa invertido que associa cada palavra (token) a uma lista de documentos onde ela ocorre.
+    - `DocFreq`: Registra a frequência de cada palavra nos documentos.
+    - `Documents`: Armazena os documentos originais (URL e conteúdo) por um ID único.
+    - `mu`: Um `sync.RWMutex` para garantir acesso seguro e concorrente ao índice.
+
+### Slide - Explicação do código da parte do index
+
+### Slide - Busca
+
+### Slide - Distríbuida
+
+### Slide - Possíveis Melhorias
 
 ### Slide - Referências
 - Go official website: https://go.dev/
