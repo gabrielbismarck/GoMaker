@@ -367,19 +367,16 @@ int main() {
 ### Slide - Capacidade de Escrita: Aqui tem que ter a comparação com C ?
 A capacidade de escrita mede a facilidade com que uma linguagem permite criar programas para um determinado domínio.
 
-Go foi projetada para maximizar a produtividade do desenvolvedor, oferecendo recursos que facilitam a escrita de código eficiente e robusto:
+- **Expressividade:** Go busca um equilíbrio entre concisão e clareza. Embora não tenha todos os operadores compactos de C (como ++ e -- que são apenas pós-fixados e não retornam valor), ela oferece:
+    - **Declaração Curta (:=):** Simplifica a declaração e inicialização de variáveis.
+    - **Múltiplos Valores de Retorno:** Permite que funções retornem resultados e erros de forma idiomática, tornando o tratamento de erros mais expressivo e menos verboso.
+    - **Concorrência Nativa (Goroutines e Canais):** A sintaxe go para iniciar uma goroutine e o uso de chan para comunicação tornam a escrita de código concorrente surpreendentemente simples e expressiva, sem a complexidade de threads e locks manuais.
 
 - Abstração:
-    - Abstração de Processo (Subprogramas): Go utiliza funções (func) como principal mecanismo de abstração de processo. Elas podem ser passadas como argumentos, retornadas de outras funções e são a base para a modularização do código.
-    - Abstração de Dados (Tipos e Interfaces):
+    - **Abstração de Processo (Subprogramas):** Go utiliza funções (func) como principal mecanismo de abstração de processo. Elas podem ser passadas como argumentos, retornadas de outras funções e são a base para a modularização do código.
+    - **Abstração de Dados (Tipos e Interfaces):**
         - structs permitem definir tipos de dados complexos, encapsulando dados relacionados.
         - Interfaces são um mecanismo poderoso de abstração em Go. Elas permitem definir comportamentos (métodos) sem especificar a implementação, promovendo o polimorfismo e o desacoplamento. Isso facilita a escrita de código flexível e extensível.
-
-- Expressividade:
-    - Go busca um equilíbrio entre concisão e clareza. Embora não tenha todos os operadores compactos de C (como ++ e -- que são apenas pós-fixados e não retornam valor), ela oferece:
-        - Declaração Curta (:=): Simplifica a declaração e inicialização de variáveis.
-        - Múltiplos Valores de Retorno: Permite que funções retornem resultados e erros de forma idiomática, tornando o tratamento de erros mais expressivo e menos verboso.
-        - Concorrência Nativa (Goroutines e Canais): A sintaxe go para iniciar uma goroutine e o uso de chan para comunicação tornam a escrita de código concorrente surpreendentemente simples e expressiva, sem a complexidade de threads e locks manuais.
 
 ```go
 package main
@@ -423,8 +420,6 @@ int main() {
 
 ### Slide -  Confiabilidade: Aqui tem que ter a comparação com C ?
 Definição: Um programa é confiável se funciona conforme o esperado em todas as condições. A confiabilidade é crucial para sistemas que precisam operar sem falhas, especialmente em ambientes de produção.
-
-Go foi projetada com a confiabilidade em mente, incorporando características que minimizam erros e facilitam a construção de software robusto:
 
 - Verificação de Tipos (Forte e Estática):
     - Go é uma linguagem fortemente tipada e estaticamente tipada. Isso significa que a maioria dos erros de tipo é detectada em tempo de compilação, antes mesmo do programa ser executado.
@@ -519,26 +514,26 @@ int main() {
 
 
 ### Slide - Outros Critérios de Avaliação da Linguagem: Portabilidade
-- Definição: A portabilidade refere-se à facilidade com que um programa pode ser movido e executado em diferentes ambientes de hardware e sistemas operacionais, sem a necessidade de grandes modificações.
-- Go foi projetada com a portabilidade em mente, tornando-a uma excelente escolha para desenvolvimento multiplataforma:
+A portabilidade refere-se à facilidade com que um programa pode ser movido e executado em diferentes ambientes de hardware e sistemas operacionais, sem a necessidade de grandes modificações.
 
-    - Compilação para Código Nativo:
-        - Go compila diretamente para código de máquina nativo, sem a necessidade de uma máquina virtual (JVM, .NET CLR) ou interpretador em tempo de execução.
-        - Isso permite gerar executáveis autônomos e otimizados para diversas arquiteturas e sistemas operacionais.
+- Compilação para Código Nativo:
+    - Go compila diretamente para código de máquina nativo, sem a necessidade de uma máquina virtual (JVM, .NET CLR) ou interpretador em tempo de execução.
+    - Isso permite gerar executáveis autônomos e otimizados para diversas arquiteturas e sistemas operacionais.
 
-    - Compilação Cruzada (Cross-Compilation):
-        - Go possui suporte nativo e robusto para compilação cruzada. Um desenvolvedor pode compilar um programa Go em um sistema operacional (ex: Linux) para ser executado em outro (ex: Windows ou macOS) ou para diferentes arquiteturas de CPU (ex: ARM, x86) com um simples comando.
-        - Isso elimina a complexidade de configurar ambientes de desenvolvimento específicos para cada plataforma de destino.
+- Compilação Cruzada (Cross-Compilation):
+    - Go possui suporte nativo e robusto para compilação cruzada. Um desenvolvedor pode compilar um programa Go em um sistema operacional (ex: Linux) para ser executado em outro (ex: Windows ou macOS) ou para diferentes arquiteturas de CPU (ex: ARM, x86) com um simples comando.
+    - Isso elimina a complexidade de configurar ambientes de desenvolvimento específicos para cada plataforma de destino.
 
-    - Ausência de Dependências Externas:
-        - Os executáveis Go são estaticamente linkados por padrão, o que significa que todas as bibliotecas necessárias são empacotadas no próprio binário.
-        - Isso reduz significativamente as dependências externas e facilita a implantação, pois o executável pode ser copiado e executado diretamente na maioria dos sistemas, sem a necessidade de instalar runtimes ou bibliotecas adicionais.
+- Ausência de Dependências Externas:
+    - Os executáveis Go são estaticamente linkados por padrão, o que significa que todas as bibliotecas necessárias são empacotadas no próprio binário.
+    - Isso reduz significativamente as dependências externas e facilita a implantação, pois o executável pode ser copiado e executado diretamente na maioria dos sistemas, sem a necessidade de instalar runtimes ou bibliotecas adicionais.
 
-    - Padronização da Linguagem:
-        - A especificação da linguagem Go é bem definida e implementada de forma consistente em todas as plataformas suportadas, garantindo que o código se comporte da mesma maneira onde quer que seja executado.
+- Padronização da Linguagem:
+    - A especificação da linguagem Go é bem definida e implementada de forma consistente em todas as plataformas suportadas, garantindo que o código se comporte da mesma maneira onde quer que seja executado.
 
 ### Slide - Outros Critérios de Avaliação da Linguagem: Generalidade
-- Definição: A generalidade (ou aplicabilidade) de uma linguagem refere-se à sua capacidade de ser utilizada em uma ampla variedade de domínios de aplicação, sem ser excessivamente especializada.
+A generalidade (ou aplicabilidade) de uma linguagem refere-se à sua capacidade de ser utilizada em uma ampla variedade de domínios de aplicação, sem ser excessivamente especializada.
+
 - Go é uma linguagem de propósito geral, projetada para ser eficaz em diversos cenários:
     - Desenvolvimento de Sistemas:
         - Go é amplamente utilizada para construir sistemas de backend de alta performance, como APIs RESTful, microsserviços, servidores web e ferramentas de linha de comando.
@@ -557,7 +552,7 @@ int main() {
     - Outros Domínios:
         - Embora menos comum, Go também pode ser usada em processamento de dados, machine learning (com bibliotecas específicas), e até mesmo em alguns projetos embarcados onde a performance e o baixo consumo de recursos são cruciais.
 
-### Slides de Explicação do Projeto
+### Slides - Explicação do Projeto
 
 
-### Referências
+### Slide - Referências
