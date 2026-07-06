@@ -553,6 +553,6 @@ A generalidade (ou aplicabilidade) de uma linguagem refere-se à sua capacidade 
         - Embora menos comum, Go também pode ser usada em processamento de dados, machine learning (com bibliotecas específicas), e até mesmo em alguns projetos embarcados onde a performance e o baixo consumo de recursos são cruciais.
 
 ### Slides - Explicação do Projeto
-
+s
 
 ### Slide - Referências
