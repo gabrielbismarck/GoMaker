@@ -19,7 +19,7 @@ func SearchQuery(c *fiber.Ctx) error {
 	// Análise Léxica: quebra a frase em tokens (palavras)
 	terms := strings.Fields(strings.ToLower(query))
 
-	// Chamada da sua lógica (pkg/search) usando o globalIndexer
+	// Chamada da lógica (pkg/search) usando o globalIndexer
 	results := search.Search(
 		terms,
 		queryType,
