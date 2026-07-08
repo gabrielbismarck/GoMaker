@@ -85,57 +85,64 @@ Lista baseada na planilha disponibilizada pelo professor.
     - Equilíbrio entre produtividade e performance
     - Facilidade de adoção e manutenção da linguagem
 
-### Slide - Construtores
+### Slide - Construtores da Linguagem
 
-Go oferece um conjunto de construtores fundamentais para a construção de software eficiente e robusto. 
+Go oferece diversos recursos para desenvolver aplicações de forma simples, segura e eficiente. Muitos desses recursos possuem equivalentes em C, enquanto outros foram introduzidos para facilitar o desenvolvimento de software moderno.
 
-Muitos têm paralelos em C, mas com características próprias que visam simplicidade e segurança.
+- Struct (struct)
+    - Go: Agrupa diferentes campos em um único tipo, permitindo representar estruturas de dados complexas.
+    - C: Possui o mesmo conceito de struct.
 
-- Tipos Estruturados (struct):
-    - Go: Agrupa campos de diferentes tipos em uma única unidadeBase para modelar dados complexos.
-    - C: Similar ao struct em C
-    
-> Diferença é que em Go, structs podem ter métodos associados e são usadas diretamente como tipos.
+> Diferença: Em Go, uma struct pode possuir métodos associados, permitindo combinar dados e comportamento sem a necessidade de classes.
 
-- Funções (func):
-    - Go: Blocos de código reutilizáveis que executam uma tarefa específica. Podem retornar múltiplos valores.
-    - C: Similar às funções em C. 
-    
-> A principal diferença em Go é o suporte nativo a múltiplos valores de retorno, o que simplifica o tratamento de erros.
+- Funções (func)
+    - Go: Blocos reutilizáveis de código que executam tarefas específicas e podem retornar múltiplos valores.
+    - C: Também utiliza funções para modularizar o código.
 
-- Variáveis e Constantes (var, const):
-    - Go: Declaração de armazenamento para valores. Go exige que variáveis declaradas sejam usadas, evitando código morto.
-    - C: Similar à declaração de variáveis e constantes.
+> Diferença: O suporte nativo a múltiplos valores de retorno facilita o tratamento de erros e evita o uso excessivo de parâmetros por referência.
 
-- Operador de Declaração Curta (:=):
-    -  Go: Não existe um equivalente direto em C. Declara e inicializa uma variável, inferindo seu tipo automaticamente. Usado para declarações locais.
-    
-> Explicação: É uma forma concisa e idiomática de declarar e atribuir um valor a uma nova variável em Go, muito utilizada no dia a dia.
+- Variáveis e Constantes (var e const)
+    - Go: Permitem armazenar valores e definir constantes. O compilador exige que variáveis declaradas sejam utilizadas.
+    - C: Possui variáveis e constantes com finalidade semelhante.
 
-- Declarações de Controle de Fluxo (if, for, switch):
-    - Go: Permitem controlar a ordem de execução do código.
-    - C: Similar às estruturas de controle de C. Go não possui o while (usa for para isso) e não exige parênteses nas condições.
+> Diferença: A verificação de variáveis não utilizadas ajuda a reduzir código morto e possíveis erros de programação.
 
-- Ponteiros (*, &):
-    - Go: Permitem manipular diretamente endereços de memória.
-    - C: Similar aos ponteiros em C. 
-    
-> Diferença: Go não possui aritmética de ponteiros, o que aumenta a segurança e reduz a complexidade.
+- Declaração Curta (:=)
+    - Go: Declara e inicializa uma variável com inferência automática de tipo.
+    - C: Não possui um equivalente direto.
 
-- Interfaces (interface):
-    - Go: Não existe um equivalente direto em C. Define um conjunto de métodos que um tipo deve implementar. Permite polimorfismo e design flexível, desacoplando a implementação da interface.
-    
-> Explicação: Em Go, um tipo implementa uma interface implicitamente ao ter todos os métodos da interface.
+> Diferença: É uma das formas mais utilizadas para declarar variáveis locais, tornando o código mais conciso.
 
-- Goroutines (go):
-    - Go: Não existe um equivalente direto em C. Funções leves e concorrentes que rodam em paralelo. Gerenciadas pelo runtime de Go.
+- Controle de Fluxo (if, for, switch)
+    - Go: Controla a execução do programa por meio de condicionais e laços.
+    - C: Possui estruturas equivalentes.
 
-> Explicação: Permitem escrever código concorrente de forma simples e eficiente, sem a complexidade de threads de sistema operacional.
+> Diferença: Go não possui while (o for desempenha esse papel) e dispensa o uso de parênteses nas condições.
 
-- Canais (chan):
-    - Go: Não existe um equivalente direto em C. Meio de comunicação seguro entre goroutines. Permitem que goroutines enviem e recebam valores umas das outras.
+- Ponteiros (* e &)
+    - Go: Permitem acessar e modificar valores por referência.
+    - C: Também utiliza ponteiros.
 
->  Explicação: Implementam o modelo CSP (Communicating Sequential Processes), onde a comunicação é a forma preferida de compartilhar memória.
+> Diferença: Go não permite aritmética de ponteiros, tornando o código mais seguro e reduzindo erros relacionados ao acesso à memória.
+
+- Interfaces (interface)
+    - Go: Definem um conjunto de métodos que um tipo deve implementar, permitindo polimorfismo e desacoplamento.
+    - C: Não possui um recurso equivalente na linguagem.
+
+> Diferença: Em Go, a implementação de uma interface é implícita: basta que um tipo implemente todos os métodos exigidos.
+
+- Goroutines (go)
+    - Go: Executam funções concorrentemente utilizando o runtime da linguagem.
+    - C: Não possui suporte nativo; normalmente utiliza bibliotecas como POSIX Threads (pthread).
+
+> Diferença: Goroutines são muito mais leves que threads do sistema operacional e são gerenciadas automaticamente pelo runtime de Go.
+
+- Canais (chan)
+    - Go: Permitem a comunicação segura entre goroutines por meio da troca de mensagens.
+    - C: Não possui um mecanismo equivalente na linguagem.
+
+> Diferença: Os canais implementam o modelo CSP (Communicating Sequential Processes), incentivando a comunicação entre processos concorrentes em vez do compartilhamento direto de memória.
+
 
 Exemplo:
 ```go
@@ -173,6 +180,8 @@ int main() {
     return 0;
 }
 ```
+
+> Falar: O exemplo mostra que Go mantém a ideia de struct presente em C, porém com uma sintaxe mais simples e expressiva. Em ambos os casos a estrutura é passada por valor, mas Go elimina a necessidade de repetir struct ao utilizar o tipo e oferece uma inicialização mais legível com campos nomeados.
 
 ### Slide - Legibilidade
 Legibilidade é a facilidade com que um programa pode ser lido e entendido.
@@ -464,7 +473,7 @@ A portabilidade refere-se à facilidade com que um programa pode ser movido e ex
 - Compilação Cruzada (Cross-Compilation):
     - Compilação para diferentes sistemas operacionais
     - Suporte a múltiplas arquiteturas, como x86 e ARM
-    - Processo simples com poucas configuraçõeso.
+    - Processo simples com poucas configurações.
 
 > Falar: "Um dos grandes diferenciais de Go é o suporte à compilação cruzada. Com um único comando é possível gerar executáveis para Windows, Linux, macOS e até diferentes arquiteturas de processadores, sem precisar configurar vários ambientes de desenvolvimento. Isso facilita bastante a distribuição de aplicações."
 
@@ -533,41 +542,41 @@ Sistema de Busca e Indexação Distribuído
 
 ### Slide - Por que Go ?
 
-| Requisito do projeto                  | Solução oferecida pelo Go |
-|  :---------------------------------:  |  :---------------------:  |
-| Coletar várias fontes simultaneamente | Goroutines                |
-| Comunicação entre tarefas             | Channels                  |
-| Processamento paralelo                | Escalonamento automático  |
-| Proteção de dados compartilhados      | `sync.RWMutex`            |
+- Concorrência nativa: Uso de goroutines para executar múltiplas tarefas simultaneamente
+- Comunicação eficiente: Channels para troca segura de informações entre goroutines
+- Processamento paralelo: Melhor aproveitamento de processadores multicore
+- Sincronização de dados: Utilização de sync.RWMutex para acesso seguro ao índice compartilhado
+- Alto desempenho: Compilação para código nativo e baixo consumo de recursos
 
-> Falar: "Escolhemos Go porque ela atende exatamente às necessidades do projeto. A linguagem oferece suporte nativo à concorrência, facilita o processamento paralelo e fornece mecanismos seguros para sincronização entre tarefas. Isso permite desenvolver um sistema distribuído eficiente, escalável e com alto desempenho, exatamente o que é necessário para um serviço de busca e indexação."
+> Falar: "A escolha da linguagem Go foi baseada nas necessidades do projeto. Como precisamos coletar documentos de várias fontes, processá-los em paralelo e manter um índice compartilhado, Go oferece todos os recursos necessários de forma nativa. As goroutines permitem executar várias tarefas simultaneamente, os channels facilitam a comunicação entre elas e o sync.RWMutex garante que o índice seja atualizado com segurança. Além disso, como Go gera código nativo, conseguimos obter um excelente desempenho e boa escalabilidade para o sistema."
 
-### Slide - Como Ele funciona ?
+## Como funciona o Projero ?
 
 O nosso projeto opera em duas fases principais: **Indexação** e **Busca**.
 
 ### Indexação
-A indexação é o processo de coletar, analisar e armazenar informações de forma estruturada para permitir a recuperação rápida e eficiente de dados. Em nosso projeto, a indexação transforma o conteúdo bruto dos documentos em um formato otimizado para buscas.
-
 **O que é a Indexação?**
-- Em termos simples, a indexação cria um "mapa" ou "índice" de todas as palavras encontradas nos documentos, associando cada palavra aos documentos onde ela aparece. 
-- Isso é análogo ao índice remissivo de um livro, que lista termos importantes e as páginas onde eles podem ser encontrados. 
-- Sem um índice, uma busca exigiria a leitura completa de cada documento, o que seria inviável para grandes volumes de dados.
 
-**Como foi aplicada em nosso Projeto ?**
-- Em nosso projeto, a indexação é gerenciada pela `struct Indexer` (localizada em `pkg/index/index.go`). Esta estrutura encapsula todo o estado do índice, incluindo:
-    - `Index`: Um mapa invertido que associa cada palavra (token) a uma lista de documentos onde ela ocorre.
-    - `DocFreq`: Registra a frequência de cada palavra nos documentos.
-    - `Documents`: Armazena os documentos originais (URL e conteúdo) por um ID único.
-    - `mu`: Um `sync.RWMutex` para garantir acesso seguro e concorrente ao índice.
+**Como funciona e como foi aplicada em nosso Projeto ?**
 
-### Slide - Explicação do código da parte do index
+### Explicação do código da parte de indexação
 
-### Slide - Busca
+### Busca
 
-### Slide - Distríbuida
+**O que é a Busca?**
 
-### Slide - Possíveis Melhorias
+**Como funciona e como foi aplicada em nosso Projeto ?**
+
+### Explicação do código da parte de busca
+
+### Busca Distríbuida
+**O que é a Busca distribuída?**
+
+**Como funciona e como foi aplicada em nosso Projeto ?**
+
+### Explicação do código da parte de busca distribuída
+
+### Possíveis Melhorias
 
 ### Slide - Referências
 - Go official website: https://go.dev/
