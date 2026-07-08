@@ -1,4 +1,4 @@
-# Sistema de Aluguel de Equipamentos — Go
+# Sistema de Busca e Indexação Distribuído — Go
 
 Projeto acadêmico: demonstrar as premissas da linguagem Go por meio de um sistema backend real, comparando implementações com e sem controle de concorrência.
 
