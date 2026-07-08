@@ -1,0 +1,5 @@
+A recursão é um conceito central no Prolog. Uma regra recursiva é definida quando um predicado chama a si mesmo.
+Exemplo clássico é o predecessor(X, Z) :- parent(X, Y), predecessor(Y, Z).
+O backtracking (retrocesso) permite que o sistema explore diferentes caminhos na árvore de refutação até encontrar a solução.
+O operador cut (!) serve para restringir o espaço de busca e evitar retrocessos desnecessários.
+bismarck gabriel

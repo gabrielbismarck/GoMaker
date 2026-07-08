@@ -1,0 +1,4 @@
+A avaliação preguiçosa (lazy evaluation) significa que uma expressão só é avaliada quando seu valor é requerido.
+Isso permite que a linguagem Hugs trabalhe com objetos infinitos, como listas de números naturais sem fim.
+Uma expressão cotizada só é avaliada uma única vez, aumentando a eficiência do sistema funcional.
+

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>GoMaker - Motor de Busca Distribuída</title>
+    <style>
+        body { font-family: sans-serif; margin: 40px; background-color: #f4f4f9; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .search-box { display: flex; gap: 10px; margin-bottom: 20px; }
+        input { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
+        button { padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border-bottom: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background-color: #f8f9fa; }
+        .score { font-weight: bold; color: #28a745; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 GoMaker Search</h1>
+        
+        <!-- 1. Campo de pesquisa e 2. Botão -->
+        <div class="search-box">
+            <input type="text" id="query" placeholder="Digite sua busca (ex: hugs, prolog)...">
+            <button onclick="realizarBusca()">Pesquisar</button>
+        </div>
+
+        <!-- 3. Tabela de resultados -->
+        <table id="tabela-resultados">
+            <thead>
+                <tr>
+                    <th>Nome do Arquivo</th>
+                    <th>Pontuação (Score)</th>
+                </tr>
+            </thead>
+            <tbody id="corpo-tabela">
+                <!-- Os resultados entrarão aqui dinamicamente -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        async function realizarBusca() {
+            const query = document.getElementById('query').value;
+            const corpoTabela = document.getElementById('corpo-tabela');
+            
+            if (!query) return alert("Digite algo para buscar!");
+
+            // Limpa a tabela anterior (Estado Inicial)
+            corpoTabela.innerHTML = "<tr><td colspan='2'>Buscando nos nós distribuídos...</td></tr>";
+
+            try {
+                // Chama o Orquestrador Go
+                // O parâmetro dist=true ativa a lógica da busca distribuída no backend
+                const response = await fetch(`http://localhost:3000/search?q=${query}&dist=true`);
+                
+                // SÍNTESE DE DADOS: Transforma o fluxo de bytes JSON em Objeto JS
+                const resultados = await response.json();
+
+                // Limpa o aviso de carregamento
+                corpoTabela.innerHTML = "";
+
+                if (resultados.length === 0) {
+                    corpoTabela.innerHTML = "<tr><td colspan='2'>Nenhum resultado encontrado.</td></tr>";
+                    return;
+                }
+
+                // OPERADOR DE ORDENAÇÃO (Ranking): 
+                // Garante que o maior Score apareça primeiro (Decrescente)
+                resultados.sort((a, b) => b.Score - a.Score);
+
+                // MAPEAMENTO DE DADOS: Transforma cada objeto em uma linha da tabela
+                resultados.forEach(item => {
+                    const linha = `
+                        <tr>
+                            <td>${item.Document}</td>
+                            <td class="score">${item.Score.toFixed(4)}</td>
+                        </tr>
+                    `;
+                    corpoTabela.innerHTML += linha;
+                });
+
+            } catch (error) {
+                console.error("Erro na comunicação:", error);
+                corpoTabela.innerHTML = "<tr><td colspan='2' style='color:red'>Erro ao conectar com o servidor GoMaker.</td></tr>";
+            }
+        }
+    </script>
+</body>
+</html>

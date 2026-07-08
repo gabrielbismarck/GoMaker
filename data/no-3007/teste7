@@ -1,0 +1,4 @@
+A sintaxe de uma linguagem de programação é o conjunto de regras que determinam se uma sentença é bem formada.
+A BNF (Backus-Naur Form) é uma metalinguagem livre de contexto usada para descrever outras linguagens.
+Usamos símbolos não-terminais entre colchetes angulares < > e produções definidas pelo operador ::=.
+EBNF adiciona extensões como o fecho de Kleene para repetições.

@@ -1,0 +1,4 @@
+O processo de tradução de uma linguagem possui estágios lógicos.
+A análise léxica (scanner) agrupa caracteres em tokens como identificadores e palavras-chave.
+A análise sintática (parser) identifica as unidades do programa e gera a árvore de análise (parse tree).
+A análise semântica mantém a tabela de símbolos e detecta erros de tipos.

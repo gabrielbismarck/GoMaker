@@ -1,0 +1,3 @@
+Um FSA (Autômato de Estados Finitos) é usado no scanner para reconhecer tokens via expressões regulares.
+Linguagens mais complexas exigem um PDA (Autômato Pushdown), que é um FSA com uma pilha associada.
+O PDA consegue reconhecer strings geradas por gramáticas livres de contexto, como palíndromos ou parênteses aninhados.

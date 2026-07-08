@@ -1,0 +1,4 @@
+Em Hugs, funções podem ser definidas com guardas, que são funções predicativas.
+Exemplo: mdc a b | b == 0 = a | otherwise = mdc b (mod a b).
+Também usamos expressões case para casamento de padrões.
+Funções de ordem alta podem receber outras funções como parâmetros ou retorná-las como resultado.

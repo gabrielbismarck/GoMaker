@@ -1,0 +1,5 @@
+A linguagem Hugs implementa o paradigma funcional. 
+Neste paradigma, declaramos a solução como valores a retornar, não como passos algorítmicos.
+O ambiente Hugs é um interpretador com o ciclo lê-avalia-exibe resultados.
+Funções são os blocos básicos de construção e realizam processamento simbólico em listas.
+
