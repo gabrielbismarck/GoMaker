@@ -2,3 +2,4 @@ O Prolog prolog é uma linguagem declarativa baseada no paradigma lógico.
 Diferente das linguagens imperativas, no Prolog não temos instruções, mas sim fatos e regras.
 Um fato define uma relação, como pai(joao, mane). 
 As perguntas ou queries acionam a máquina de inferência para buscar respostas na base de conhecimento.
+bismarck bismarck bismarck bismarck

@@ -12,75 +12,82 @@ import (
 
 func main() {
 	// Crio 10 instâncias de servidores (nós).
-	// O operador 'for' define a faixa de portas (3001 a 3010).
+	// O operador 'for' define a iteração sobre o intervalo de portas.
 	for i := 3001; i <= 3010; i++ {
 
-		// OPERADOR 'go': Dispara uma Goroutine independente para cada nó.
-		// Isso permite concorrência nativa com baixo custo (2KB por nó)
+		// OPERADOR 'go': Concorrência Nativa (Modelo CSP).
+		// Dispara uma Goroutine (Thread leve de 2KB) para cada nó
 		go func(porta int) {
-			// Encapsulamento do servidor Fiber sem mensagens de log de inicialização (Startup)
+			// Encapsulamento do servidor Fiber
 			app := fiber.New(fiber.Config{DisableStartupMessage: true})
 
 			app.Get("/search", func(c *fiber.Ctx) error {
-				// (Entrada): Recupera o termo e normaliza para minúsculo.
+				// Entrada: Recupera e normaliza a query.
 				query := strings.ToLower(strings.TrimSpace(c.Query("q")))
+				fmt.Printf("🔍 [Nó %d] Recebeu busca por: \"%s\"\n", porta, query)
 
-				// LOG DE VALIDAÇÃO: Importante para provar que o nó recebeu a mensagem.
-				fmt.Printf("🔍 [Nó %d] Recebeu solicitação de busca por: \"%s\"\n", porta, query)
-
-				// O nó só acessa sua respectiva pasta.
+				// Define a pasta exclusiva deste nó.
 				caminhoPasta := fmt.Sprintf("./data/no-%d", porta)
-
 				var resultadosLocais []search.SearchResult
 
-				// Lê a lista de arquivos físicos no disco.
+				// Tenta acessar o hardware (disco) para ler o índice local.
 				arquivos, err := os.ReadDir(caminhoPasta)
-				fmt.Printf("📂 [Nó %d] Vasculhando a pasta: %s (Encontrou %d arquivos)\n", porta, caminhoPasta, len(arquivos))
 				if err != nil {
-					// Se a pasta não existe, retorna vazio sem travar o sistema.
+					// Se a pasta não existe, retorna vazio (Zero-Value).
 					return c.JSON([]search.SearchResult{})
 				}
 
-				// OPERADOR 'range': Itera sobre a coleção de arquivos encontrados.
+				// O operador strings.Fields quebra a frase em palavras individuais.
+				// Transforma "bismarck gabriel" em ["bismarck", "gabriel"].
+				termosBusca := strings.Fields(query)
+
+				// Itera sobre a coleção de arquivos da pasta.
 				for _, f := range arquivos {
-					// Ignora pastas acidentais, foca apenas em arquivos.
 					if f.IsDir() {
 						continue
 					}
 
 					caminhoArquivo := fmt.Sprintf("%s/%s", caminhoPasta, f.Name())
-					conteudo, err := os.ReadFile(caminhoArquivo)
-					if err != nil {
-						continue
-					}
-
-					// MOTOR DE BUSCA (Análise de Conteúdo):
-					// Normalizamos o conteúdo do arquivo para garantir o 'match'.
+					conteudo, _ := os.ReadFile(caminhoArquivo)
 					textoArquivo := strings.ToLower(string(conteudo))
 
-					if strings.Contains(textoArquivo, query) {
-						// Adiciona o documento encontrado à lista.
+					var scoreAcumulado float64 = 0.0
+					encontrouAlgumTermo := false
+
+					// Para cada palavra da busca, contamos as ocorrências no arquivo.
+					for _, termo := range termosBusca {
+						// O operador strings.Count retorna a frequência do lexema.
+						ocorrencias := strings.Count(textoArquivo, termo)
+						if ocorrencias > 0 {
+							encontrouAlgumTermo = true
+							// Acumula o score dinamicamente.
+							scoreAcumulado += float64(ocorrencias)
+						}
+					}
+
+					if encontrouAlgumTermo {
+						// Adiciona o arquivo com sua nota real.
 						resultadosLocais = append(resultadosLocais, search.SearchResult{
 							Document: f.Name(),
-							Score:    1.0,
+							Score:    scoreAcumulado,
 						})
-						fmt.Printf("   ✅ [Nó %d] Termo encontrado no arquivo: %s\n", porta, f.Name())
+						fmt.Printf("   ✅ [Nó %d] Encontrado em: %s | Score: %.2f\n", porta, f.Name(), scoreAcumulado)
 					}
 				}
 
-				// (Saída): Retorna o slice como JSON para o Orquestrador.
+				// Retorna o resultado serializado em JSON.
 				return c.JSON(resultadosLocais)
 			})
 
-			// O método Listen bloqueia a Goroutine, mantendo o nó ativo.
+			// O método Listen mantém a Goroutine viva servindo a porta.
 			if err := app.Listen(fmt.Sprintf(":%d", porta)); err != nil {
 				log.Printf("❌ Erro fatal no nó %d: %v", porta, err)
 			}
 		}(i)
 	}
 
-	fmt.Println("🚀 Cluster GoMaker ON: 10 nós independentes prontos para busca real.")
+	fmt.Println("🚀 Cluster GoMaker ATUALIZADO: Suporte a múltiplos termos e score dinâmico.")
 
-	// Bloqueio infinito para manter o processo pai vivo enquanto as goroutines rodam.
+	// Bloqueio infinito para manter o processo pai vivo.
 	select {}
 }
