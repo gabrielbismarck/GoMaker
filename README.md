@@ -594,9 +594,9 @@ type Indexer struct {
 > Falar: "O núcleo do sistema é a estrutura `Indexer`, responsável por armazenar todas as informações da indexação. Ela contém o índice invertido, a frequência dos termos e a lista de documentos indexados. Como várias goroutines podem acessar essas estruturas simultaneamente, utilizamos o `sync.RWMutex` para garantir acesso concorrente de forma segura."
 
 ### Slide – Inicialização do Sistema
-- `NewIndexer()`
-- `createEmptyIndex()`
-- `loadIndex()`
+- `NewIndexer()`: Cria e inicializa uma nova instância do indexador.
+- `createEmptyIndex()` : Inicializa as estruturas de dados do índice vazias.
+- `loadIndex()`: Carrega um índice previamente salvo do disco para a memória.
 
 ```go
 func NewIndexer(name string) *Indexer {
@@ -643,12 +643,12 @@ func (idx *Indexer) loadIndex() error {
 }
 ```
 
-> Falar: "Essas três funções trabalham juntas durante a inicialização do sistema. A função `NewIndexer` cria o indexador principal, `createEmptyIndex` inicializa todas as estruturas de dados necessárias e `loadIndex` verifica se já existe um índice salvo em disco. Caso exista, ele é carregado automaticamente; caso contrário, um novo índice vazio é criado."
+> Falar: "Essas três funções são responsáveis pela inicialização do sistema. A `NewIndexer` cria o indexador principal, a `createEmptyIndex` prepara todas as estruturas de dados necessárias para o funcionamento da aplicação e, por fim, a `loadIndex` verifica se já existe um índice salvo em disco. Se existir, ele é carregado automaticamente; caso contrário, o sistema inicia com um índice vazio, pronto para receber novos documentos."
 
 ### Slide - Processo de Indexação
-- `AddDocToIndex()`
-- `SaveIndex()`
-- `writeStructToFile()`
+- `AddDocToIndex()`: Processa um documento e adiciona suas palavras ao índice invertido.
+- `SaveIndex()`: Salva o estado atual do índice em um arquivo no disco.
+- `writeStructToFile()`: Serializa as estruturas de dados e grava o índice em arquivo.
 
 ```go
 func (idx *Indexer) AddDocToIndex(url string, content string) {
@@ -712,11 +712,11 @@ func (idx *Indexer) writeStructToFile(filename string, data interface{}) error {
 }
 ```
 
-> Falar: "Depois que o sistema é iniciado, a função `AddDocToIndex` recebe um documento, realiza a tokenização, normaliza as palavras e atualiza o índice invertido. Quando desejamos persistir essas informações, `SaveIndex` prepara os dados para armazenamento e `writeStructToFile` realiza a serialização e grava o índice em arquivo, permitindo que ele seja reutilizado futuramente."
+> Falar: "Após a inicialização, o sistema começa a indexar os documentos. A função `AddDocToIndex` recebe o conteúdo do documento, realiza a tokenização, normaliza as palavras e atualiza o índice invertido e a frequência dos termos. Quando desejamos persistir essas informações, a função `SaveIndex` prepara o índice para armazenamento e chama `writeStructToFile`, que realiza a serialização dos dados e grava o índice em disco. Dessa forma, o índice pode ser reutilizado quando a aplicação for iniciada novamente."
 
 ### Slide - Recuperação do Índice
-- `loadIndex()`
-- `readStructFromFile()`
+- `loadIndex()`: Carrega o índice salvo do disco para a memória da aplicação.
+- `readStructFromFile()`: Lê e desserializa os dados armazenados no arquivo de índice.
 
 ```go
 func (idx *Indexer) loadIndex() error {
@@ -753,12 +753,12 @@ func (idx *Indexer) readStructFromFile(filename string, data interface{}) error 
 }
 ```
 
-> Falar: "Quando a aplicação é iniciada novamente, essas funções recuperam o índice salvo anteriormente. Primeiro, `readStructFromFile` lê o arquivo armazenado no disco e, em seguida, `loadIndex` restaura todas as estruturas do sistema, evitando que seja necessário indexar todos os documentos novamente."
+> Falar: "Essas funções são responsáveis por recuperar um índice que já foi salvo anteriormente. A função `loadIndex` verifica se o arquivo de índice existe e coordena o processo de carregamento. Em seguida, `readStructFromFile` lê o conteúdo desse arquivo e desserializa as estruturas de dados, restaurando o índice exatamente como estava antes da aplicação ser encerrada. Isso evita que todos os documentos precisem ser indexados novamente a cada inicialização do sistema."
 
 ### Slide - Fluxo da Busca
-- `SearchQuery()`
-- `Search()`
-- `scoreDoc()`
+- `SearchQuery()`: Recebe a consulta do usuário e coordena a execução da busca.
+- `Search()`: Localiza os documentos que correspondem aos termos pesquisados.
+- `scoreDoc()`: Calcula a relevância de cada documento utilizando o algoritmo TF-IDF.
 
 ```go
 func SearchQuery(c *fiber.Ctx) error {
@@ -817,12 +817,12 @@ func scoreDoc(terms []string, doc string, idx index.InvertedIndex, docFreq index
 }
 ```
 
-> Falar: "Quando o usuário realiza uma pesquisa, a requisição chega à função `SearchQuery`, responsável por interpretar os parâmetros da consulta. Em seguida, `Search` localiza os documentos que contêm os termos pesquisados e `scoreDoc` calcula a relevância de cada documento utilizando o algoritmo TF-IDF. Ao final, os documentos são ordenados de acordo com essa pontuação."
+> Falar: "O processo de busca começa na função `SearchQuery`, responsável por receber a consulta do usuário e identificar se a busca será local ou distribuída. Em seguida, a função `Search` percorre o índice invertido para encontrar os documentos que contêm os termos pesquisados. Por fim, `scoreDoc` calcula a relevância de cada documento utilizando o algoritmo TF-IDF, permitindo que os resultados sejam ordenados do mais relevante para o menos relevante antes de serem retornados ao usuário."
 
 ### Slide - Busca Distribuída
-- `AggregateDistributedResults()`
-- `SearchInRemoteNode()`
-- `RankDistributed()`
+- `AggregateDistributedResults()`: Coordena a busca em todos os nós e reúne os resultados obtidos.
+- `SearchInRemoteNode()`: Envia a consulta para um nó remoto e recupera seus resultados.
+- `RankDistributed()`: Consolida e ordena os resultados de todos os nós por relevância.
 
 ```go
 func AggregateDistributedResults(query string) []search.SearchResult {
@@ -874,7 +874,7 @@ func RankDistributed(allResults []SearchResult) []SearchResult {
 }
 ```
 
-> Falar: "Se a busca for distribuída, o sistema consulta vários servidores ao mesmo tempo utilizando goroutines. A função `SearchInRemoteNode` envia as requisições para cada nó, `AggregateDistributedResults` reúne todos os resultados recebidos pelos channels e, por fim, `RankDistributed` consolida e ordena os documentos para apresentar um único ranking ao usuário."
+> Falar: "Quando a busca é distribuída, o sistema precisa consultar vários servidores ao mesmo tempo. A função `AggregateDistributedResults` é responsável por coordenar esse processo, criando goroutines para que cada nó seja consultado em paralelo. Cada goroutine executa a função `SearchInRemoteNode`, que envia a consulta ao servidor remoto e recebe os documentos encontrados. Depois que todos os nós respondem, a função `RankDistributed` reúne esses resultados, soma as pontuações quando necessário e gera um único ranking ordenado por relevância para retornar ao usuário."
 
 ### Slide – Inicialização da Aplicação
 - `main()`
