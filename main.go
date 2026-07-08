@@ -6,6 +6,8 @@ import (
     "github.com/gabrielbismarck/GoMaker/internal/controller"
     "github.com/gabrielbismarck/GoMaker/pkg/index"
     "github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors" // IMPORTAR O MIDDLEWARE
+
 )
 
 func main() {
@@ -17,6 +19,7 @@ func main() {
 
     // 3. Simplicidade: Inicializamos o framework Fiber usando o operador de inferência ':='.
     app := fiber.New()
+    app.Use(cors.New()) // USAR O MIDDLEWARE
 
     // --- ROTAS DO SISTEMA ---
 

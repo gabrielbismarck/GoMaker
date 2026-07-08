@@ -1,0 +1,4 @@
+A linguagem Go foi projetada para serviços de nuvem com suporte nativo à concorrência.
+O modelo CSP (Communicating Sequential Processes) prega: "Não comunique compartilhando memória; compartilhe memória comunicando".
+Usamos goroutines para tarefas leves e channels (canais) para sincronização segura.
+Isso garante alta performance e confiabilidade em sistemas distribuídos como o GoMaker.

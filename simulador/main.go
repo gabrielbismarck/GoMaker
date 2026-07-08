@@ -2,44 +2,53 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
-	"github.com/gabrielbismarck/GoMaker/pkg/index"
+	"strings"
+
+	"github.com/gabrielbismarck/GoMaker/pkg/search"
 	"github.com/gofiber/fiber/v2"
 )
 
 func main() {
-	inicioPorta := 3001
-	fimPorta := 3003
-
-	fmt.Println("🚀 Iniciando nós simulados...")
-
-	for i := inicioPorta; i <= fimPorta; i++ {
+	// Criando 10 nós virtuais
+	for i := 3001; i <= 3010; i++ {
 		go func(porta int) {
-			app := fiber.New(fiber.Config{
-				DisableStartupMessage: true,
-			})
-
-			noID := fmt.Sprintf("no-%d", porta)
-			
-			// 1. Abstração de Dados: Criamos o indexador para o nó.
-			idx := index.NewIndexer(noID)
-
-			// 2. OPERADOR DE DESCARTE (_): 
-			// Como o compilador de Go proíbe variáveis não utilizadas (Eficiência),
-			// usamos o '_' para dizer ao tradutor: "Eu sei que 'idx' existe, 
-			// mas não preciso acessar seus campos agora".
-			_ = idx 
-
-			fmt.Printf("✅ Nó ativo na porta %d\n", porta)
+			app := fiber.New(fiber.Config{DisableStartupMessage: true})
 
 			app.Get("/search", func(c *fiber.Ctx) error {
-				// Simulação de resposta estruturada (SearchResult)
-				return c.Status(200).JSON([]fiber.Map{
-					{
-						"Document": fmt.Sprintf("livro_da_estante_%d.txt", porta),
-						"Score":    0.95,
-					},
-				})
+				// 1. Recupera o termo de busca (Abstração de Entrada)
+				query := strings.ToLower(c.Query("q"))
+
+				// 2. Define qual a "estante" de livros deste nó (Encapsulamento)
+				caminhoPasta := fmt.Sprintf("./data/no-%d", porta)
+
+				var resultadosLocais []search.SearchResult
+
+				// 3. Lê os arquivos físicos da pasta
+				arquivos, err := ioutil.ReadDir(caminhoPasta)
+				if err != nil {
+					// Se a pasta não existir, retorna lista vazia (Confiabilidade)
+					return c.JSON([]search.SearchResult{})
+				}
+
+				for _, f := range arquivos {
+					// 4. OPERADOR 'ReadFile': Carrega o conteúdo do disco para a RAM
+					conteudo, _ := ioutil.ReadFile(caminhoPasta + "/" + f.Name())
+
+					// 5. ANÁLISE LÉXICA: Verifica se a palavra existe no texto
+					// strings.Contains é o nosso motor de busca simplificado
+					if strings.Contains(strings.ToLower(string(conteudo)), query) {
+						resultadosLocais = append(resultadosLocais, search.SearchResult{
+							Document: f.Name(),
+							Score:    1.0, // Define um score real para termos encontrados
+						})
+					}
+				}
+
+				// 6. SÍNTESE DE DADOS: Retorna apenas os arquivos que deram 'match'
+				// Se nenhum arquivo tiver a palavra, retornará um JSON vazio '[]'
+				return c.JSON(resultadosLocais)
 			})
 
 			if err := app.Listen(fmt.Sprintf(":%d", porta)); err != nil {
@@ -47,6 +56,5 @@ func main() {
 			}
 		}(i)
 	}
-	// Bloqueia a Goroutine principal para manter os nós vivos.
 	select {}
 }
