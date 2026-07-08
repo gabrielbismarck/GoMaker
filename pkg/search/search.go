@@ -85,10 +85,8 @@ func rankResults(scores map[string]float64) []SearchResult {
 	return results
 }
 
-// --- PARTE DA MARIA (BUSCA DISTRIBUÍDA) ---
-
 // SearchInRemoteNode: Abstração de Comunicação via Rede.
-// Faz uma requisição HTTP GET para outro nó do cluster [README.md, 212].
+// Faz uma requisição HTTP GET para outro nó do cluster
 func SearchInRemoteNode(serverURL string, query string) []SearchResult {
 	// Operador fmt.Sprintf: Formata a URL de destino dinamicamente.
 	fullURL := fmt.Sprintf("%s/search?q=%s", serverURL, query)
@@ -96,17 +94,16 @@ func SearchInRemoteNode(serverURL string, query string) []SearchResult {
 	// Operador http.Get: Realiza a chamada de rede (Comunicação entre Unidades).
 	resp, err := http.Get(fullURL)
 	if err != nil {
-		// Confiabilidade: Se o servidor remoto falhar, retornamos uma lista vazia 
-		// para não travar o sistema principal [README.md, 174].
+		// Confiabilidade: Se o servidor remoto falhar, retorna uma lista vazia
+		// para não travar o sistema principal
 		return []SearchResult{}
 	}
-	
+
 	// Operador 'defer': Garante o fechamento do corpo da resposta (Gerência de Recursos).
 	defer resp.Body.Close()
 
 	var results []SearchResult
 	// Operador json.NewDecoder: Transforma o fluxo de bytes JSON de volta em uma Struct Go.
-	// Esse processo é chamado de Deserialização ou Síntese de Dados [Victor Lavrenko, 182].
 	if err := json.NewDecoder(resp.Body).Decode(&results); err != nil {
 		return []SearchResult{}
 	}
@@ -115,10 +112,10 @@ func SearchInRemoteNode(serverURL string, query string) []SearchResult {
 }
 
 // RankDistributed: Agregador Global de Scores.
-// Junta os resultados de todos os nós em um ranking final único [Victor Lavrenko, 180].
+// Junta os resultados de todos os nós em um ranking final único
 func RankDistributed(allResults []SearchResult) []SearchResult {
 	globalScores := make(map[string]float64)
-	
+
 	// Consolida os scores TF-IDF recebidos de diferentes máquinas.
 	for _, res := range allResults {
 		globalScores[res.Document] += res.Score

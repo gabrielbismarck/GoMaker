@@ -50,8 +50,8 @@
             corpoTabela.innerHTML = "<tr><td colspan='2'>Buscando nos nós distribuídos...</td></tr>";
 
             try {
-                // ABSTRAÇÃO DE COMUNICAÇÃO: Chama o seu Orquestrador Go
-                // O parâmetro dist=true ativa a lógica da Maria no backend
+                // Chama o Orquestrador Go
+                // O parâmetro dist=true ativa a lógica da busca distribuída no backend
                 const response = await fetch(`http://localhost:3000/search?q=${query}&dist=true`);
                 
                 // SÍNTESE DE DADOS: Transforma o fluxo de bytes JSON em Objeto JS

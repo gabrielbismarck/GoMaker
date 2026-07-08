@@ -29,10 +29,10 @@ func SearchQuery(c *fiber.Ctx) error {
 	var results []search.SearchResult
 
 	if distributed {
-		// 1. Chamada para a parte da Maria (Busca Distribuída)
+		// Chamada para a busca distribuída
 		results = AggregateDistributedResults(query)
 	} else {
-		// 2. Busca Local (Sua lógica original)
+		// Busca Local
 		terms := strings.Fields(strings.ToLower(query))
 		results = search.Search(
 			terms,
@@ -47,15 +47,15 @@ func SearchQuery(c *fiber.Ctx) error {
 }
 
 // AggregateDistributedResults: Orquestrador da busca em múltiplos nós.
-// Implementa o modelo CSP para Concorrência Nativa [1].
+// Implementa o modelo CSP para Concorrência Nativa
 func AggregateDistributedResults(query string) []search.SearchResult {
 	// Operador 'make(chan)': Cria um CANAL para comunicação entre Goroutines.
-	// O canal garante a sincronização e evita Race Conditions [2, 3].
+	// O canal garante a sincronização e evita Race Conditions
 	resultsChan := make(chan []search.SearchResult)
 
 	// Dispara uma busca para cada nó remoto em paralelo.
 	for _, url := range remoteNodes {
-		// Operador 'go': Inicia uma Goroutine (Thread leve de 2KB) [4, 5].
+		// Operador 'go': Inicia uma Goroutine (Thread leve de 2KB)
 		// Isso permite consultar dezenas de servidores simultaneamente sem travar o programa.
 		go func(nodeURL string) {
 			// Chamada de rede para o nó remoto
@@ -78,6 +78,6 @@ func AggregateDistributedResults(query string) []search.SearchResult {
 		allResults = append(allResults, nodeRes...)
 	}
 
-	// Após reunir todos, chamamos a função de ranking para ordenar por score TF-IDF.
+	// Após reunir todos, chamo a função de ranking para ordenar por score TF-IDF.
 	return search.RankDistributed(allResults)
 }
