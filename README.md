@@ -1,4 +1,4 @@
-# Sistema de Busca e Indexação Distribuído — Go
+# Sistema de Busca e Indexação Distribuído - Go
 
 Projeto acadêmico: demonstrar as premissas da linguagem Go por meio de um sistema backend real, comparando implementações com e sem controle de concorrência.
 
@@ -577,12 +577,71 @@ O sistema funciona em duas etapas principais:
 - `InvertedIndex`: Relaciona cada palavra aos documentos onde aparece
 - `DocumentFrequency`: Armazena em quantos documentos cada termo está presente
 
+```go
+type InvertedIndex map[string]map[string]int
+
+type DocumentFrequency map[string]int
+
+type Indexer struct {
+    Index     InvertedIndex
+    DocFreq   DocumentFrequency
+    Documents []string
+    mu        sync.RWMutex
+    name      string       
+}
+```
+
 > Falar: "O núcleo do sistema é a estrutura `Indexer`, responsável por armazenar todas as informações da indexação. Ela contém o índice invertido, a frequência dos termos e a lista de documentos indexados. Como várias goroutines podem acessar essas estruturas simultaneamente, utilizamos o `sync.RWMutex` para garantir acesso concorrente de forma segura."
 
 ### Slide – Inicialização do Sistema
 - `NewIndexer()`
 - `createEmptyIndex()`
 - `loadIndex()`
+
+```go
+func NewIndexer(name string) *Indexer {
+    idx := &Indexer{
+        name: name,
+    }
+    idx.createEmptyIndex()
+
+    if err := idx.loadIndex(); err != nil {
+        if errors.Is(err, os.ErrNotExist) {
+            log.Printf("Arquivo de índice '%s.db' não encontrado. Criando um novo índice vazio.", name)
+        } else {
+            log.Printf("Erro ao carregar o índice de '%s.db': %v. Iniciando com um índice vazio.", name, err)
+        }
+    } else {
+        log.Printf("Índice carregado com sucesso de '%s.db'.", name)
+    }
+
+    return idx
+}
+
+func (idx *Indexer) createEmptyIndex() {
+    idx.Index = make(InvertedIndex)
+    idx.DocFreq = make(DocumentFrequency)
+    idx.Documents = make([]string, 0)
+}
+
+func (idx *Indexer) loadIndex() error {
+    indexFilePath := fmt.Sprintf("/tmp/%s.db", idx.name)
+    if _, err := os.Stat(indexFilePath); errors.Is(err, os.ErrNotExist) {
+        return os.ErrNotExist
+    }
+
+    var savedIndex SavedIndex
+    err := idx.readStructFromFile(indexFilePath, &savedIndex)
+    if err != nil {
+        return fmt.Errorf("erro ao ler o índice do arquivo: %w", err)
+    }
+
+    idx.Index = savedIndex.Index
+    idx.DocFreq = savedIndex.DocFreq
+    idx.Documents = savedIndex.Documents
+    return nil
+}
+```
 
 > Falar: "Essas três funções trabalham juntas durante a inicialização do sistema. A função `NewIndexer` cria o indexador principal, `createEmptyIndex` inicializa todas as estruturas de dados necessárias e `loadIndex` verifica se já existe um índice salvo em disco. Caso exista, ele é carregado automaticamente; caso contrário, um novo índice vazio é criado."
 
@@ -591,11 +650,108 @@ O sistema funciona em duas etapas principais:
 - `SaveIndex()`
 - `writeStructToFile()`
 
+```go
+func (idx *Indexer) AddDocToIndex(url string, content string) {
+    idx.mu.Lock() 
+    defer idx.mu.Unlock()
+
+    idx.Documents = append(idx.Documents, url)
+
+    reader := strings.NewReader(content)
+    seenTerms := make(map[string]bool)
+    scanner := bufio.NewScanner(reader)
+    scanner.Split(bufio.ScanWords)
+
+    for scanner.Scan() {
+        word := strings.ToLower(strings.Trim(scanner.Text(), ",.!?&<>;:=§$%{}[]()|"))
+
+        if idx.Index[word] == nil {
+            idx.Index[word] = make(map[string]int)
+        }
+        idx.Index[word][url]++
+
+        if !seenTerms[word] {
+            idx.DocFreq[word]++
+            seenTerms[word] = true
+        }
+    }
+}
+
+func (idx *Indexer) SaveIndex() error {
+    idx.mu.RLock()
+    defer idx.mu.RUnlock()
+
+    savedIndex := SavedIndex{
+        Index:     idx.Index,
+        DocFreq:   idx.DocFreq,
+        Documents: idx.Documents,
+    }
+
+    indexFilePath := fmt.Sprintf("/tmp/%s.db", idx.name)
+    err := idx.writeStructToFile(indexFilePath, savedIndex)
+    if err != nil {
+        return fmt.Errorf("erro ao salvar o índice: %w", err)
+    }
+    log.Printf("Índice salvo com sucesso em '%s'.", indexFilePath)
+    return nil
+}
+
+func (idx *Indexer) writeStructToFile(filename string, data interface{}) error {
+    var buf bytes.Buffer
+    enc := gob.NewEncoder(&buf)
+    err := enc.Encode(data)
+    if err != nil {
+        return fmt.Errorf("erro ao serializar as structs: %w", err)
+    }
+
+    err = os.WriteFile(filename, buf.Bytes(), 0644)
+    if err != nil {
+        return fmt.Errorf("erro ao gravar o arquivo '%s': %w", filename, err)
+    }
+    return nil
+}
+```
+
 > Falar: "Depois que o sistema é iniciado, a função `AddDocToIndex` recebe um documento, realiza a tokenização, normaliza as palavras e atualiza o índice invertido. Quando desejamos persistir essas informações, `SaveIndex` prepara os dados para armazenamento e `writeStructToFile` realiza a serialização e grava o índice em arquivo, permitindo que ele seja reutilizado futuramente."
 
 ### Slide - Recuperação do Índice
 - `loadIndex()`
 - `readStructFromFile()`
+
+```go
+func (idx *Indexer) loadIndex() error {
+    indexFilePath := fmt.Sprintf("/tmp/%s.db", idx.name)
+    if _, err := os.Stat(indexFilePath); errors.Is(err, os.ErrNotExist) {
+        return os.ErrNotExist
+    }
+
+    var savedIndex SavedIndex
+    err := idx.readStructFromFile(indexFilePath, &savedIndex)
+    if err != nil {
+        return fmt.Errorf("erro ao ler o índice do arquivo: %w", err)
+    }
+
+    idx.Index = savedIndex.Index
+    idx.DocFreq = savedIndex.DocFreq
+    idx.Documents = savedIndex.Documents
+    return nil
+}
+
+func (idx *Indexer) readStructFromFile(filename string, data interface{}) error {
+    content, err := os.ReadFile(filename)
+    if err != nil {
+        return fmt.Errorf("erro ao ler o arquivo '%s': %w", filename, err)
+    }
+
+    buf := bytes.NewBuffer(content)
+    dec := gob.NewDecoder(buf)
+    err = dec.Decode(data)
+    if err != nil {
+        return fmt.Errorf("erro ao desserializar as structs do arquivo '%s': %w", filename, err)
+    }
+    return nil
+}
+```
 
 > Falar: "Quando a aplicação é iniciada novamente, essas funções recuperam o índice salvo anteriormente. Primeiro, `readStructFromFile` lê o arquivo armazenado no disco e, em seguida, `loadIndex` restaura todas as estruturas do sistema, evitando que seja necessário indexar todos os documentos novamente."
 
@@ -604,6 +760,63 @@ O sistema funciona em duas etapas principais:
 - `Search()`
 - `scoreDoc()`
 
+```go
+func SearchQuery(c *fiber.Ctx) error {
+	query := c.Query("q")
+	queryType := c.Query("type", "SIMPLE")
+	distributed := c.Query("dist") == "true"
+
+	if query == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Busca vazia"})
+	}
+
+	var results []search.SearchResult
+
+	if distributed {
+		results = AggregateDistributedResults(query)
+	} else {
+		terms := strings.Fields(strings.ToLower(query))
+		results = search.Search(
+			terms,
+			queryType,
+			globalIndexer.Index,
+			globalIndexer.DocFreq,
+			len(globalIndexer.Documents),
+		)
+	}
+
+	return c.JSON(results)
+}
+
+func Search(terms []string, queryType string, idx index.InvertedIndex, docFreq index.DocumentFrequency, numDocs int) []SearchResult {
+	scores := make(map[string]float64)
+
+	if queryType == "AND" {
+		for _, doc := range intersectDocs(terms, idx) {
+			scores[doc] = scoreDoc(terms, doc, idx, docFreq, numDocs)
+		}
+	} else {
+		for _, term := range terms {
+			for doc := range idx[term] {
+				scores[doc] += scoreDoc([]string{term}, doc, idx, docFreq, numDocs)
+			}
+		}
+	}
+
+	return rankResults(scores)
+}
+
+func scoreDoc(terms []string, doc string, idx index.InvertedIndex, docFreq index.DocumentFrequency, numDocs int) float64 {
+	score := 0.0
+	for _, term := range terms {
+		tf := float64(idx[term][doc])
+		idf := math.Log(float64(numDocs) / float64(docFreq[term]))
+		score += tf * idf
+	}
+	return score
+}
+```
+
 > Falar: "Quando o usuário realiza uma pesquisa, a requisição chega à função `SearchQuery`, responsável por interpretar os parâmetros da consulta. Em seguida, `Search` localiza os documentos que contêm os termos pesquisados e `scoreDoc` calcula a relevância de cada documento utilizando o algoritmo TF-IDF. Ao final, os documentos são ordenados de acordo com essa pontuação."
 
 ### Slide - Busca Distribuída
@@ -611,12 +824,96 @@ O sistema funciona em duas etapas principais:
 - `SearchInRemoteNode()`
 - `RankDistributed()`
 
+```go
+func AggregateDistributedResults(query string) []search.SearchResult {
+	resultsChan := make(chan []search.SearchResult)
+
+	for _, url := range remoteNodes {
+		go func(nodeURL string) {
+			res := search.SearchInRemoteNode(nodeURL, query)
+			resultsChan <- res
+		}(url)
+	}
+
+	var allResults []search.SearchResult
+
+	for i := 0; i < len(remoteNodes); i++ {
+		nodeRes := <-resultsChan
+		allResults = append(allResults, nodeRes...)
+	}
+
+	return search.RankDistributed(allResults)
+}
+
+func SearchInRemoteNode(serverURL string, query string) []SearchResult {
+	fullURL := fmt.Sprintf("%s/search?q=%s", serverURL, query)
+	resp, err := http.Get(fullURL)
+	
+    if err != nil {
+		return []SearchResult{}
+	}
+	
+	defer resp.Body.Close()
+
+	var results []SearchResult
+	if err := json.NewDecoder(resp.Body).Decode(&results); err != nil {
+		return []SearchResult{}
+	}
+
+	return results
+}
+
+func RankDistributed(allResults []SearchResult) []SearchResult {
+	globalScores := make(map[string]float64)
+	
+	for _, res := range allResults {
+		globalScores[res.Document] += res.Score
+	}
+
+	return rankResults(globalScores)
+}
+```
+
 > Falar: "Se a busca for distribuída, o sistema consulta vários servidores ao mesmo tempo utilizando goroutines. A função `SearchInRemoteNode` envia as requisições para cada nó, `AggregateDistributedResults` reúne todos os resultados recebidos pelos channels e, por fim, `RankDistributed` consolida e ordena os documentos para apresentar um único ranking ao usuário."
 
 ### Slide – Inicialização da Aplicação
 - `main()`
 - Configuração das rotas
 - Inicialização do servidor Fiber
+
+```go
+package main
+
+import (
+    "fmt"
+    "log"
+    "github.com/gabrielbismarck/GoMaker/internal/controller"
+    "github.com/gabrielbismarck/GoMaker/pkg/index"
+    "github.com/gofiber/fiber/v2"
+)
+
+func main() {
+
+    myIndexer := index.NewIndexer("default")
+
+	controller.SetIndexer(myIndexer)
+
+	app := fiber.New()
+
+	app.Post("/index", controller.AddDocumentToIndex)
+
+	app.Post("/save-index", func(c *fiber.Ctx) error {
+		if err := myIndexer.SaveIndex(); err != nil {
+			log.Printf("Erro ao salvar o índice: %v", err)
+			return c.Status(fiber.StatusInternalServerError).SendString(fmt.Sprintf("Erro ao salvar o índice: %v", err))
+		}
+		return c.SendString("Índice salvo com sucesso!")
+	})
+
+	log.Fatal(app.Listen(":3000"))
+
+}
+```
 
 > Falar: "Por fim, o arquivo `main.go` é responsável por iniciar toda a aplicação. Ele cria o indexador, configura as rotas da API, inicializa o servidor Fiber e disponibiliza os endpoints responsáveis pela indexação, busca e persistência dos dados."
 
