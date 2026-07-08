@@ -18,8 +18,8 @@ var remoteNodes = []string{
 
 // SearchQuery: Processa a requisição GET /search?q=palavra&dist=true
 func SearchQuery(c *fiber.Ctx) error {
-	query := c.Query("q")
-	queryType := c.Query("type", "SIMPLE")
+	query := c.Query("q") // Recupera o parâmetro de busca da URL
+	queryType := c.Query("type", "SIMPLE") // Recupera o parâmetro de busca da URL, caso não exista, assume "SIMPLE"
 	distributed := c.Query("dist") == "true" // Verifica se o usuário quer busca distribuída
 
 	if query == "" {

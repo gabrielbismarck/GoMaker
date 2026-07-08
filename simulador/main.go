@@ -71,7 +71,7 @@ func main() {
 							Document: f.Name(),
 							Score:    scoreAcumulado,
 						})
-						fmt.Printf("   ✅ [Nó %d] Encontrado em: %s | Score: %.2f\n", porta, f.Name(), scoreAcumulado)
+						fmt.Printf("✅ [Nó %d] Encontrado em: %s | Score: %.2f\n", porta, f.Name(), scoreAcumulado)
 					}
 				}
 
@@ -86,7 +86,7 @@ func main() {
 		}(i)
 	}
 
-	fmt.Println("🚀 Cluster GoMaker ATUALIZADO: Suporte a múltiplos termos e score dinâmico.")
+	fmt.Println("🚀 Search GoMaker: Suporte a busca distribuida.")
 
 	// Bloqueio infinito para manter o processo pai vivo.
 	select {}
