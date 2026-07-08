@@ -114,13 +114,38 @@ func SearchInRemoteNode(serverURL string, query string) []SearchResult {
 // RankDistributed: Agregador Global de Scores.
 // Junta os resultados de todos os nós em um ranking final único
 func RankDistributed(allResults []SearchResult) []SearchResult {
-	globalScores := make(map[string]float64)
-
-	// Consolida os scores TF-IDF recebidos de diferentes máquinas.
-	for _, res := range allResults {
-		globalScores[res.Document] += res.Score
+	if len(allResults) == 0 {
+		return []SearchResult{}
 	}
 
-	// Reutiliza a lógica de ordenação para garantir uniformidade.
-	return rankResults(globalScores)
+	globalScores := make(map[string]float64)
+	maxScore := 0.0
+
+	// 1. FASE DE AGREGAÇÃO (REDUCE)
+	for _, res := range allResults {
+		globalScores[res.Document] += res.Score
+		// Operador de Comparação '>': Identifica o valor de pico para normalização.
+		if globalScores[res.Document] > maxScore {
+			maxScore = globalScores[res.Document]
+		}
+	}
+
+	// 2. FASE DE NORMALIZAÇÃO E MAPEAMENTO
+	finalResults := make([]SearchResult, 0, len(globalScores))
+	for doc, score := range globalScores {
+		// Operador '/': Realiza a divisão em ponto flutuante para a escala [0..1].
+		normalizedScore := score / maxScore
+
+		finalResults = append(finalResults, SearchResult{
+			Document: doc,
+			Score:    normalizedScore,
+		})
+	}
+
+	// 3. ORDENAÇÃO FINAL
+	sort.Slice(finalResults, func(i, j int) bool {
+		return finalResults[i].Score > finalResults[j].Score
+	})
+
+	return finalResults
 }
