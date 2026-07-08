@@ -550,31 +550,75 @@ Sistema de Busca e Indexação Distribuído
 
 > Falar: "A escolha da linguagem Go foi baseada nas necessidades do projeto. Como precisamos coletar documentos de várias fontes, processá-los em paralelo e manter um índice compartilhado, Go oferece todos os recursos necessários de forma nativa. As goroutines permitem executar várias tarefas simultaneamente, os channels facilitam a comunicação entre elas e o sync.RWMutex garante que o índice seja atualizado com segurança. Além disso, como Go gera código nativo, conseguimos obter um excelente desempenho e boa escalabilidade para o sistema."
 
-## Como funciona o Projero ?
+### Slide -  Como funciona o Projero ?
 
-O nosso projeto opera em duas fases principais: **Indexação** e **Busca**.
+O sistema funciona em duas etapas principais:
 
-### Indexação
-**O que é a Indexação?**
+- **Indexação:**
+    - Coleta documentos de sites e arquivos PDF
+    - Extrai e normaliza palavras
+    - Armazena as informações em um índice invertido 
 
-**Como funciona e como foi aplicada em nosso Projeto ?**
+> Falar: "A primeira etapa é a indexação. O sistema coleta documentos de diferentes fontes, como páginas da web e arquivos PDF. Em seguida, o conteúdo é processado, as palavras são normalizadas e armazenadas em um índice invertido, permitindo que futuras consultas sejam realizadas de forma muito mais rápida."
 
-### Explicação do código da parte de indexação
+- **Busca:**
+    - Consulta o índice local ou distribuído
+    - Calcula relevância utilizando TF-IDF
+    - Retorna os documentos ordenados por relevância
 
-### Busca
+> Falar: "Na segunda etapa acontece a busca. Quando o usuário faz uma consulta, o sistema procura os termos no índice criado anteriormente, calcula a relevância de cada documento utilizando o algoritmo TF-IDF e retorna os resultados ordenados do mais relevante para o menos relevante."
 
-**O que é a Busca?**
+### Slide - Principais Estruturas
+- `Indexer`:
+  - Gerencia todo o índice de documentos
+  - Mantém índice invertido, frequência de termos e documentos
+  - Protegido por `sync.RWMutex`
 
-**Como funciona e como foi aplicada em nosso Projeto ?**
+- `InvertedIndex`: Relaciona cada palavra aos documentos onde aparece
+- `DocumentFrequency`: Armazena em quantos documentos cada termo está presente
 
-### Explicação do código da parte de busca
+> Falar: "O núcleo do sistema é a estrutura `Indexer`, responsável por armazenar todas as informações da indexação. Ela contém o índice invertido, a frequência dos termos e a lista de documentos indexados. Como várias goroutines podem acessar essas estruturas simultaneamente, utilizamos o `sync.RWMutex` para garantir acesso concorrente de forma segura."
 
-### Busca Distríbuida
-**O que é a Busca distribuída?**
+### Slide – Inicialização do Sistema
+- `NewIndexer()`
+- `createEmptyIndex()`
+- `loadIndex()`
 
-**Como funciona e como foi aplicada em nosso Projeto ?**
+> Falar: "Essas três funções trabalham juntas durante a inicialização do sistema. A função `NewIndexer` cria o indexador principal, `createEmptyIndex` inicializa todas as estruturas de dados necessárias e `loadIndex` verifica se já existe um índice salvo em disco. Caso exista, ele é carregado automaticamente; caso contrário, um novo índice vazio é criado."
 
-### Explicação do código da parte de busca distribuída
+### Slide - Processo de Indexação
+- `AddDocToIndex()`
+- `SaveIndex()`
+- `writeStructToFile()`
+
+> Falar: "Depois que o sistema é iniciado, a função `AddDocToIndex` recebe um documento, realiza a tokenização, normaliza as palavras e atualiza o índice invertido. Quando desejamos persistir essas informações, `SaveIndex` prepara os dados para armazenamento e `writeStructToFile` realiza a serialização e grava o índice em arquivo, permitindo que ele seja reutilizado futuramente."
+
+### Slide - Recuperação do Índice
+- `loadIndex()`
+- `readStructFromFile()`
+
+> Falar: "Quando a aplicação é iniciada novamente, essas funções recuperam o índice salvo anteriormente. Primeiro, `readStructFromFile` lê o arquivo armazenado no disco e, em seguida, `loadIndex` restaura todas as estruturas do sistema, evitando que seja necessário indexar todos os documentos novamente."
+
+### Slide - Fluxo da Busca
+- `SearchQuery()`
+- `Search()`
+- `scoreDoc()`
+
+> Falar: "Quando o usuário realiza uma pesquisa, a requisição chega à função `SearchQuery`, responsável por interpretar os parâmetros da consulta. Em seguida, `Search` localiza os documentos que contêm os termos pesquisados e `scoreDoc` calcula a relevância de cada documento utilizando o algoritmo TF-IDF. Ao final, os documentos são ordenados de acordo com essa pontuação."
+
+### Slide - Busca Distribuída
+- `AggregateDistributedResults()`
+- `SearchInRemoteNode()`
+- `RankDistributed()`
+
+> Falar: "Se a busca for distribuída, o sistema consulta vários servidores ao mesmo tempo utilizando goroutines. A função `SearchInRemoteNode` envia as requisições para cada nó, `AggregateDistributedResults` reúne todos os resultados recebidos pelos channels e, por fim, `RankDistributed` consolida e ordena os documentos para apresentar um único ranking ao usuário."
+
+### Slide – Inicialização da Aplicação
+- `main()`
+- Configuração das rotas
+- Inicialização do servidor Fiber
+
+> Falar: "Por fim, o arquivo `main.go` é responsável por iniciar toda a aplicação. Ele cria o indexador, configura as rotas da API, inicializa o servidor Fiber e disponibiliza os endpoints responsáveis pela indexação, busca e persistência dos dados."
 
 ### Possíveis Melhorias
 
