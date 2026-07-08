@@ -835,6 +835,12 @@ func main() {
 }
 ```
 
+## Avaliação do Grupo
+
+- Gabriel Bismarck: Busca/Busca Distribuída
+- Lucas Vasconcelos: Indexação
+- Maria Luiza: Busca/Busca Distribuída
+
 ## Referências
 - Go official website: https://go.dev/
 - CTII418- Linguagem Go (IFSP): https://cbt.ifsp.edu.br/images/Documentos/2021/CTII/CTII418_Go.pdf
