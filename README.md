@@ -839,15 +839,15 @@ func main() {
 
 ### Lucas
 - Gabriel: conduziu a implementação e os testes do módulo de busca com responsabilidade técnica e entregas consistentes. Fez a integração com o cliente de consulta, escreveu testes automatizados que aumentaram a confiabilidade do sistema e resolveu bugs importantes durante a integração. Comunicação clara nas reuniões e boa documentação do código. Nota: 9/10.
-- Maria: foi responsável pela implementação da busca distribuída e mostrou habilidade em projetar a coordenação entre nós e o balanceamento de consultas. Contribuiu para a arquitetura do sistema e participou ativamente na resolução de problemas de sincronização e latência. Poderia ter deixado mais comentários no código e detalhado alguns trade-offs na wiki. Nota: 9/10.
+- Maria: foi responsável pela implementação da busca distribuída e mostrou habilidade em projetar a coordenação entre nós e o balanceamento de consultas. Contribuiu para a arquitetura do sistema e participou ativamente na resolução de problemas de sincronização e latência. Poderia ter deixado mais comentários no código e detalhado alguns trade-offs na wiki. Nota: 8.5/10.
 
 ### Gabriel
-- Lucas: Desenvolveu o pipeline de indexação, cuidou da preparação e normalização dos dados e garantiu que os dados chegassem ao índice com qualidade. Implementou rotinas de pré-processamento eficientes e colaborou na integração com o módulo de busca. Demonstrou comprometimento nas entregas e participação nas discussões de design. Nota: 9/10.
-- Maria: Coordenou a implementação da busca distribuída, atuando na orquestração entre nós e no balanceamento das consultas. Ajudou a validar cenários de latência e a estratégia de particionamento. Participou ativamente dos testes integrados. Nota: 9/10.
+- Lucas: Desenvolveu o pipeline de indexação, cuidou da preparação e normalização dos dados e garantiu que os dados chegassem ao índice com qualidade. Implementou rotinas de pré-processamento eficientes e colaborou na integração com o módulo de busca. Demonstrou comprometimento nas entregas e participação nas discussões de design. Nota: 7.5/10.
+- Maria: Coordenou a implementação da busca distribuída, atuando na orquestração entre nós e no balanceamento das consultas. Ajudou a validar cenários de latência e a estratégia de particionamento. Participou ativamente dos testes integrados. Nota: 8/10.
 
 ### Maria
 - Gabriel: Implementou o módulo de busca e os testes, além de integrar corretamente com o cliente de consulta. Forneceu documentação útil e respondeu prontamente aos problemas de integração durante os testes. Nota: 9/10.
-- Lucas: Foi responsável pelo pipeline de indexação e pela normalização dos dados, entregando módulos bem estruturados e testados. Ajudou na preparação dos dados para a busca e participou das revisões de código. Nota: 9/10.
+- Lucas: Foi responsável pelo pipeline de indexação e pela normalização dos dados, entregando módulos bem estruturados e testados. Ajudou na preparação dos dados para a busca e participou das revisões de código. Nota: 8/10.
 
 ## Referências
 - Go official website: https://go.dev/
